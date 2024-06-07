@@ -22,6 +22,7 @@ from handler.logHandler import LogHandler
 from helper.validator import ProxyValidator
 from handler.proxyHandler import ProxyHandler
 from handler.configHandler import ConfigHandler
+import subprocess
 
 
 class DoValidator(object):
@@ -53,7 +54,35 @@ class DoValidator(object):
                 proxy.region = cls.regionGetter(proxy) if cls.conf.proxyRegion else ""
         else:
             proxy.fail_count += 1
+        test_proxy_ip = cls.test_proxy_ip(proxy.proxy)
+
+        if not test_proxy_ip:
+            proxy.last_status = False
+            proxy.fail_count += 1
+
+
         return proxy
+
+    def test_proxy_ip(proxy_ip):
+        # 使用 curl 命令测试代理 IP 并打印结果
+        try:
+            result = subprocess.run(['curl', '-x', proxy_ip, 'http://ifconfig.me'], capture_output=True, text=True,
+                                    timeout=2)
+            if result.returncode == 0:
+                returned_ip = result.stdout.strip()
+                print(f"代理 IP {proxy_ip} 测试成功，返回 IP: {returned_ip}")
+                if returned_ip == proxy_ip.split(':')[0]:
+                    return True
+                else:
+                    print(f"代理 IP {proxy_ip} 测试失败，返回 IP: {returned_ip}")
+                    return False
+            else:
+                print(f"代理 IP {proxy_ip} 测试失败，错误信息: {result.stderr.strip()}")
+                return False
+        except subprocess.TimeoutExpired:
+            print(f"代理 IP {proxy_ip} 测试超时")
+            return False
+        return False
 
     @classmethod
     def httpValidator(cls, proxy):

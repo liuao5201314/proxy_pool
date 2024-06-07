@@ -37,7 +37,7 @@ PORT = 5010
 # example:
 #      Redis: redis://:password@ip:port/db
 #      Ssdb:  ssdb://:password@ip:port
-DB_CONN = 'redis://:pwd@127.0.0.1:6379/0'
+DB_CONN = 'redis://:123456@127.0.0.1:6379/8'
 
 # proxy table name
 TABLE_NAME = 'use_proxy'
@@ -48,14 +48,15 @@ PROXY_FETCHER = [
     "freeProxy01",
     "freeProxy02",
     "freeProxy03",
-    "freeProxy04",
+    # "freeProxy04",
     "freeProxy05",
     "freeProxy06",
     "freeProxy07",
-    "freeProxy08",
-    "freeProxy09",
+    # "freeProxy08",
+    # "freeProxy09",
     "freeProxy10",
-    "freeProxy11"
+    "freeProxy11",
+    "freeProxy12",
 ]
 
 # ############# proxy validator #################
@@ -65,7 +66,7 @@ HTTP_URL = "http://httpbin.org"
 HTTPS_URL = "https://www.qq.com"
 
 # 代理验证时超时时间
-VERIFY_TIMEOUT = 10
+VERIFY_TIMEOUT = 5
 
 # 近PROXY_CHECK_COUNT次校验中允许的最大失败次数,超过则剔除代理
 MAX_FAIL_COUNT = 0
