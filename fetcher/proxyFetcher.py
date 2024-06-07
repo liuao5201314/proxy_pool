@@ -64,13 +64,14 @@ class ProxyFetcher(object):
         """ 开心代理
         获取开心代理网站上的代理
         """
-        target_urls = ["http://www.kxdaili.com/dailiip.html", "http://www.kxdaili.com/dailiip/2/1.html"]
-        for url in target_urls:
-            tree = WebRequest().get(url).tree
-            for tr in tree.xpath("//table[@class='active']//tr")[1:]:
-                ip = "".join(tr.xpath('./td[1]/text()')).strip()
-                port = "".join(tr.xpath('./td[2]/text()')).strip()
-                yield "%s:%s" % (ip, port)
+        target_urls = ["http://www.kxdaili.com/dailiip/1/{}.html", "http://www.kxdaili.com/dailiip/2/{}.html"]
+        for page_index in range(1, 5):
+            for url in target_urls:
+                tree = WebRequest().get(url.format(page_index), verify=False).tree
+                for tr in tree.xpath("//table[@class='active']//tr")[1:]:
+                    ip = "".join(tr.xpath('./td[1]/text()')).strip()
+                    port = "".join(tr.xpath('./td[2]/text()')).strip()
+                    yield "%s:%s" % (ip, port)
 
     @staticmethod
     def freeProxy04():
@@ -93,7 +94,7 @@ class ProxyFetcher(object):
                 yield "%s:%s" % (ip, port)
 
     @staticmethod
-    def freeProxy05(page_count=1):
+    def freeProxy05(page_count=5):
         """ 快代理 https://www.kuaidaili.com
         获取快代理网站上的代理
         """
@@ -104,12 +105,14 @@ class ProxyFetcher(object):
         url_list = []
         # q:下面这一行是什么意思
         # a
-        for page_index in range(1, page_count + 1):
+        for page_index in range(1, 5):
             for pattern in url_pattern:
                 url_list.append(pattern.format(page_index))
 
         for url in url_list:
             html = WebRequest().get(url)
+            # 要停2秒,否则会被封
+            sleep(2)
             #要从网页中js代码中提取ip和端口,找fpsList变量
             fps_list = re.findall(r'fpsList\s*=\s*(.*?);', html.text)
             #转为json格式
@@ -123,14 +126,17 @@ class ProxyFetcher(object):
         """ 冰凌代理 https://www.binglx.cn
         获取冰凌代理网站上的代理
         """
-        url = "http://www.binglx.cn/?page=1"
-        try:
-            tree = WebRequest().get(url).tree
-            proxy_list = tree.xpath('.//table//tr')
-            for tr in proxy_list[1:]:
-                yield ':'.join(tr.xpath('./td/text()')[0:2])
-        except Exception as e:
-            print(e)
+        url = "http://www.binglx.cn/?page={}"
+        # 从第一页开始获取,共获取5页
+        for i in range(1, 5):
+            try:
+                tree = WebRequest().get(url.format(i)).tree
+                proxy_list = tree.xpath('.//table//tr')
+                for tr in proxy_list[1:]:
+                    yield ':'.join(tr.xpath('./td/text()')[0:2])
+            except Exception as e:
+                print(e)
+
 
     @staticmethod
     def freeProxy07():
@@ -182,7 +188,7 @@ class ProxyFetcher(object):
             # 取出js方法
             # 取出js方法
             js_hanShu = re.findall('(function .*?)</script>', response)[0]
-            # print(js_hanShu)
+            print(js_hanShu)
 
             js_hanShu = str(js_hanShu).replace('eval("qo=eval;qo(po);")', 'return po')
             js_run = execjs.compile(js_hanShu)
@@ -235,7 +241,7 @@ class ProxyFetcher(object):
 
 if __name__ == '__main__':
     p = ProxyFetcher()
-    for _ in p.freeProxy12():
+    for _ in p.freeProxy03():
         print(_)
 
 # http://nntime.com/proxy-list-01.htm
